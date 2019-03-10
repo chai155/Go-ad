@@ -4,11 +4,6 @@ import (
 	"testing"
 )
 
-// check valid md5
-// check valid url
-// check valid parallel arg
-// check valid domain arg
-
 func Test_md5hash(t *testing.T) {
 	testUrl := "http://adjust.com"
 	actual := getMD5Hash(testUrl)
