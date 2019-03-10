@@ -1,5 +1,5 @@
 # Go-ad
-A Go tool to generate http urls given the domain strings and generate md5 hash for the generated urls.
+A Go tool to generate http URLs and their md5 hash when provided with domains.
 
 ## Execution
 To execute the application, run the following commands.
@@ -7,7 +7,7 @@ To execute the application, run the following commands.
 - ```Go-ad.exe -parallel < int > < domain(s) >``` (the binary name may change according to the platform)
 
 ### Optional argument:
--parallel argument represents the number of parallel jobs. By default the value is 10. A positive integer number can be passed to override the default value.
+```-parallel``` keyword argument represents the number of parallel jobs. By default the value is 10. A positive integer number can be passed to override the default value.
     
 ### Compulsory arguments:
 One or more strings separated by space, which represent the domain of the URL has(ve) to be passed as arguments.
