@@ -21,13 +21,13 @@ type Job struct {
 }
 
 // validate if the string is valid url or nots
-func validateURL(urls []string) {
-	for _, val := range urls {
-		_, err := url.ParseRequestURI(val)
-		if err != nil {
-			log.Fatalln("Validation Error: Invalid url: " + val)
-		}
+func validateURL(val string) bool {
+	_, err := url.ParseRequestURI(val)
+	if err != nil {
+		fmt.Println("Invalid URL: ", val)
+		return false
 	}
+	return true
 }
 
 // create and return md5 hash for the given string
@@ -48,7 +48,9 @@ func worker(jobs chan Job, results chan Result, wg *sync.WaitGroup) {
 
 // allocate the urls to the jobs
 func allocateUrls(urls []string, jobs chan Job, noOfJobs int) {
-	for i := 0; i < noOfJobs; i++ {
+	for i := 0; i < noOfJobs; i++ { // validate if the created urls are valid urls
+		isValid := validateURL(urls[i])
+		logValidationErrors(isValid)
 		job := Job{i, urls[i]}
 		jobs <- job
 	}
@@ -74,16 +76,43 @@ func result(results chan Result, done chan bool) {
 	done <- true
 }
 
-func validateParallelArg(arg int) {
+func validateParallelArg(arg int) bool {
 	if arg <= 0 {
-		log.Fatalln("Validation Error: parallel argument value has be a positive integer value")
+		fmt.Println("Invalid usage of -parallel argument. Please use positive integer value")
+		return false
+	}
+	return true
+}
+
+func validateDomainArgs(args []string) bool {
+	if len(args) == 0 {
+		fmt.Println("Domain(s) are missing in the command line argument.")
+		return false
+	}
+	return true
+}
+
+func logValidationErrors(isValid bool) {
+	if false {
+		log.Fatalln("Validation Error: Invalid argument. Usage: Go-ad.exe -parallel int <domain names>\n Example: Go-ad.exe -parallel 3 google.com fb.com yahoo.com")
 	}
 }
 
-func validateDomainArgs(args []string) {
-	if len(args) == 0 {
-		log.Fatalln("Validation Error: Could not find domain string argument")
-	}
+func run(noOfWorkers int, urls []string) {
+	// create channels to send and receive jobs and results
+	var jobs = make(chan Job, len(urls))
+	var results = make(chan Result, noOfWorkers)
+
+	// assign urls to the jobs
+	go allocateUrls(urls, jobs, len(urls))
+	done := make(chan bool)
+
+	// print the result
+	go result(results, done)
+
+	// create a a worker pool with the number of parallel execution given
+	createWorkerPool(jobs, results, noOfWorkers)
+	<-done
 }
 
 func main() {
@@ -93,10 +122,11 @@ func main() {
 	flag.Parse()
 
 	// validate command line arguments
-	validateParallelArg(*parallel)
-	validateDomainArgs(flag.Args())
+	isValid := validateParallelArg(*parallel)
+	logValidationErrors(isValid)
+	isValid = validateDomainArgs(flag.Args())
+	logValidationErrors(isValid)
 
-	noOfWorkers := *parallel
 	domains := flag.Args()
 	var urls []string
 
@@ -106,21 +136,5 @@ func main() {
 		urls = append(urls, newUrl)
 	}
 
-	// validate if the created urls are valid urls
-	validateURL(urls)
-
-	// create channels to send and receive jobs and results
-	var jobs = make(chan Job, len(urls))
-	var results = make(chan Result, *parallel)
-
-	// assign urls to the jobs
-	go allocateUrls(urls, jobs, len(urls))
-	done := make(chan bool)
-
-	// print the result
-	go result(results, done)
-
-	// create a a worker pool with the number of parallele execution given
-	createWorkerPool(jobs, results, noOfWorkers)
-	<-done
+	run(*parallel, urls)
 }
