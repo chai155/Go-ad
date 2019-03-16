@@ -1,5 +1,5 @@
 # Go-ad
-A Go tool to generate http URLs and their md5 hash when provided with domains.
+A Go tool to make http requests and print the address of the request along with the MD5 hash of the response.
 
 ## Execution
 To execute the application, run the following commands.
@@ -13,7 +13,14 @@ To execute the application, run the following commands.
 One or more strings separated by space, which represent the domain of the URL has(ve) to be passed as arguments.
 
 ### Output:
-One or more URL(s) and their corresponding MD5 hash values will be printed on the console.
+One or more URL(s) and their corresponding MD5 hash values of responses will be printed on the console.
+
+### Errors:
+In case of error, the message is logged in the console.
+
+#### Example:
+For an input: ``` Go-ad.exe sdfgsdg ```, we get
+``` HTTP Error:  Get http://sdfgsdg: dial tcp: lookup sdfgsdg: no such host ```
 
 ## Example(in windows OS):
 ```Go-ad.exe -parallel 2 google.com fb.com yahoo.com```
@@ -29,3 +36,4 @@ Example output:
 ## Tests:
 To execute tests, run:
 ``` make test```
+
