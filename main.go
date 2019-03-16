@@ -5,7 +5,9 @@ import (
 	"encoding/hex"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"net/url"
 	"sync"
 )
@@ -25,7 +27,7 @@ type Job struct {
 	urlVal string
 }
 
-// validate if the string is valid url or nots
+// validate if the string is a valid url or nots
 func validateURL(val string) bool {
 	_, err := url.ParseRequestURI(val)
 	if err != nil {
@@ -36,16 +38,27 @@ func validateURL(val string) bool {
 }
 
 // create and return md5 hash for the given string
-func getMD5Hash(text string) string {
+func getMD5Hash(data []byte) string {
 	hash := md5.New()
-	hash.Write([]byte(text))
+	hash.Write(data)
 	return hex.EncodeToString(hash.Sum(nil))
 }
 
-// convert the url to md5 hash
+// send http requests in parallel and get response
 func worker(jobs chan Job, results chan Result, wg *sync.WaitGroup) {
 	for job := range jobs {
-		output := Result{job, getMD5Hash(job.urlVal)}
+
+		res, err := http.Get(job.urlVal)
+		if err != nil {
+			log.Fatalln("HTTP Error: Get request was not successful: ", err)
+		}
+		resData, err := ioutil.ReadAll(res.Body)
+		res.Body.Close()
+		if err != nil {
+			log.Fatalln("HTTP Error: Could not read the response body: ", err)
+		}
+
+		output := Result{job, getMD5Hash(resData)}
 		results <- output
 	}
 	wg.Done()
@@ -53,8 +66,8 @@ func worker(jobs chan Job, results chan Result, wg *sync.WaitGroup) {
 
 // allocate the urls to the jobs
 func allocateUrls(urls []string, jobs chan Job, noOfJobs int) {
-	for i := 0; i < noOfJobs; i++ { // validate if the created urls are valid urls
-		isValid := validateURL(urls[i])
+	for i := 0; i < noOfJobs; i++ {
+		isValid := validateURL(urls[i]) // validate if the created urls are valid urls
 		logValidationErrors(isValid)
 		job := Job{i, urls[i]}
 		jobs <- job
@@ -143,5 +156,6 @@ func main() {
 
 	urls := createURLs(flag.Args())
 
+	// send HTTP requests to the urls and print the response
 	run(*parallel, urls)
 }
