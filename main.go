@@ -44,21 +44,31 @@ func getMD5Hash(data []byte) string {
 	return hex.EncodeToString(hash.Sum(nil))
 }
 
+func getHashFromHTTPRequest(urlVal string) (string, error) {
+	res, err := http.Get(urlVal)
+	if err != nil {
+		return "", err
+	}
+	resData, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	if err != nil {
+		return "", err
+	}
+
+	hash := getMD5Hash(resData)
+	return hash, nil
+}
+
 // send http requests in parallel and get response
 func worker(jobs chan Job, results chan Result, wg *sync.WaitGroup) {
 	for job := range jobs {
 
-		res, err := http.Get(job.urlVal)
+		hash, err := getHashFromHTTPRequest(job.urlVal)
 		if err != nil {
-			log.Fatalln("HTTP Error: Get request was not successful: ", err)
-		}
-		resData, err := ioutil.ReadAll(res.Body)
-		res.Body.Close()
-		if err != nil {
-			log.Fatalln("HTTP Error: Could not read the response body: ", err)
+			log.Fatalln("HTTP Error: ", err)
 		}
 
-		output := Result{job, getMD5Hash(resData)}
+		output := Result{job, hash}
 		results <- output
 	}
 	wg.Done()
