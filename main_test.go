@@ -4,15 +4,6 @@ import (
 	"testing"
 )
 
-func Test_md5hash(t *testing.T) {
-	testUrl := "http://adjust.com"
-	actual := getMD5Hash(testUrl)
-	expected := "b53f3f2ec2e7e01d9e1130baac274a90"
-	if actual != expected {
-		t.Errorf("expected '%s' but got '%s'", expected, actual)
-	}
-}
-
 func Test_validateParallelArgs(t *testing.T) {
 	invalidArg := 0
 	actual := validateParallelArg(invalidArg)
@@ -65,5 +56,24 @@ func Test_validateURL(t *testing.T) {
 	expected = true
 	if actual != expected {
 		t.Errorf("expected '%t' but got '%t'", expected, actual)
+	}
+}
+
+func Test_sendHTTPRequests(t *testing.T) {
+	invalidURL := "http://sdfgsdg"
+	actual, _ := getHashFromHTTPRequest(invalidURL)
+	expected := 0
+	hashLen := len(actual)
+	if hashLen != expected {
+		t.Errorf("expected '%d' but got '%d'", expected, hashLen)
+	}
+
+	validUrl := "http://google.com"
+	actual, _ = getHashFromHTTPRequest(validUrl)
+	// MD5 processes an arbitrary-length message into a fixed-length output of 128 bits, typically represented as a sequence of 32 hexadecimal digits
+	expected = 32
+	hashLen = len(actual)
+	if hashLen != expected {
+		t.Errorf("expected '%d' but got '%d'", expected, hashLen)
 	}
 }
