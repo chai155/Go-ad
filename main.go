@@ -10,6 +10,11 @@ import (
 	"sync"
 )
 
+const (
+	// default parallel number of workers is 10
+	defaultWorkers = 10
+)
+
 // structures to store the jobs and results
 type Result struct {
 	job     Job
@@ -115,10 +120,19 @@ func run(noOfWorkers int, urls []string) {
 	<-done
 }
 
+func createURLs(domains []string) []string {
+	var urls []string
+	// create urls
+	for _, val := range domains {
+		newUrl := "http://" + val
+		urls = append(urls, newUrl)
+	}
+	return urls
+}
+
 func main() {
 
-	// default parallel number of workers is 10
-	parallel := flag.Int("parallel", 10, "an int")
+	parallel := flag.Int("parallel", defaultWorkers, "an int")
 	flag.Parse()
 
 	// validate command line arguments
@@ -127,14 +141,7 @@ func main() {
 	isValid = validateDomainArgs(flag.Args())
 	logValidationErrors(isValid)
 
-	domains := flag.Args()
-	var urls []string
-
-	// create urls
-	for _, val := range domains {
-		newUrl := "http://" + val
-		urls = append(urls, newUrl)
-	}
+	urls := createURLs(flag.Args())
 
 	run(*parallel, urls)
 }
