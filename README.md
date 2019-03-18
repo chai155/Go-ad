@@ -1,5 +1,5 @@
 # Go-ad
-A Go tool to make http requests and print the address of the request along with the MD5 hash of the response.
+A Go tool to make HTTP requests and print the address of the request along with the MD5 hash of the response.
 
 ## Execution
 To execute the application, run the following commands.
@@ -10,7 +10,7 @@ To execute the application, run the following commands.
 ```-parallel``` keyword argument represents the number of parallel jobs. By default the value is 10. A positive integer number can be passed to override the default value.
     
 ### Compulsory arguments:
-One or more strings separated by space, which represent the domain of the URL has(ve) to be passed as arguments.
+One or more strings separated by space, which represent the URL or the domain of the URL has(ve) to be passed as arguments.
 
 ### Output:
 One or more URL(s) and their corresponding MD5 hash values of responses will be printed on the console.
@@ -23,11 +23,11 @@ For an input: ``` Go-ad.exe sdfgsdg ```, we get
 ``` HTTP Error:  Get http://sdfgsdg: dial tcp: lookup sdfgsdg: no such host ```
 
 ## Example(in windows OS):
-```Go-ad.exe -parallel 2 google.com fb.com yahoo.com```
+```Go-ad.exe -parallel 2 google.com http://www.adjust.com yahoo.com```
 
 Example output: 
 
-```http://fb.com fd71094d08a3637e76ccee6637f03713```
+```http://www.adjust.com 7c873e66a8ad68462ff3592c88ce80a6```
 
 ```http://yahoo.com 873c87c71f8bf1d15a53ce0c0676971f```
 

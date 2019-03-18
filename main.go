@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 )
 
@@ -147,8 +148,12 @@ func createURLs(domains []string) []string {
 	var urls []string
 	// create urls
 	for _, val := range domains {
-		newUrl := "http://" + val
-		urls = append(urls, newUrl)
+		if strings.HasPrefix(val, "http://") {
+			urls = append(urls, val)
+		} else {
+			newUrl := "http://" + val
+			urls = append(urls, newUrl)
+		}
 	}
 	return urls
 }
